@@ -1,3 +1,87 @@
+
+def get_build_year_range_for_air_change_rate(year):
+    if year <= 1977:
+        return "<1977"
+    elif year < 1995:
+        return "<1995"
+    else:
+        return ">=1995"
+
+def get_build_year_range_for_u_values(year):
+    if year <= 1918:
+        return "<=1918"
+    elif 1919 <= year <= 1948:
+        return "1919-1948"
+    elif 1949 <= year <= 1957:
+        return "1949-1957"
+    elif 1958 <= year <= 1968:
+        return "1958-1968"
+    elif 1969 <= year <= 1978:
+        return "1969-1978"
+    elif 1979 <= year <= 1983:
+        return "1979-1983"
+    elif 1984 <= year <= 1994:
+        return "1984-1994"
+    else:
+        return ">=1995"
+
+
+# Annex definitions
+def a_3_2_simplified_thermal_bridges():
+    # Placeholder in case we get national values for ΔUTB values
+    return None
+
+
+def a_3_3_temperature_correction_factor():
+    # Placeholder in case we get national values for f__x values
+    return None
+
+
+def a_3_4_simplified_air_change_rate():
+    # Placeholder in case we get national values for n values
+    return None
+
+
+def a_4_2_internal_design_temperature():
+    # Placeholder in case we get national values for θint,build values
+    return None
+
+def a_4_3_simplified_u_value():
+    # Placeholder in case we get national values for U values
+    return None
+
+
+def b_2_1_simplified_thermal_bridges(delta__utb_selection_criteria: str):
+    # ΔUTB value  in accordance with Annex B.2.1 W/m2KW/(m2∙K)
+    return b_2_1_table_b_1_additional_thermal_transmittance_for_thermal_bridges[delta__utb_selection_criteria]
+
+
+def b_3_2_simplified_thermal_bridges():
+    # ΔUTB value in accordance with Annex B.3.2 W/m2KW/(m2∙K)
+    return 0.1
+
+
+def b_3_3_temperature_correction_factor(be_adjacent_to):
+    # f__x value in accordance with Annex B.3.3
+    return b_3_3_table_b_11_temperature_correction_factor[be_adjacent_to]
+
+def b_3_4_simplified_air_change_rate(build_year:int, air_tightness_level:str = None):
+    build_year_range = get_build_year_range_for_air_change_rate(build_year)
+    # Air change rate in accordance with Annex B.3.4 [h−1]
+    return b_3_4_table_b_12_air_change_rate[air_tightness_level] if air_tightness_level is not None else b_3_4_table_b_12_air_change_rate[build_year_range]
+
+
+def b_4_2_internal_design_temperature(building_type):
+    # Internal design temperature in accordance with Annex B.4.2 [°C]
+    return b_4_2_table_b_14_building_temperature[building_type]
+
+
+def b_4_3_simplified_u_value(be_type: str, be_sub_type: str, build_year: str):
+    build_year_range = get_build_year_range_for_u_values(build_year)
+    print('build_year_range', build_year_range)
+    # U values in accordance with Annex B.4.3 [W/(m2∙K)]
+    return b_4_3_table_b_15_u_values[be_type][be_sub_type][build_year_range]
+
 b_2_1_table_b_1_additional_thermal_transmittance_for_thermal_bridges = {
     "New buildings with a high level of heat insulation and attested minimization of thermal bridges that exceeds generally recognized rules of practice": 0.02,
     "New buildings in compliance with generally recognized rules of practice regarding the minimization of thermal bridges": 0.05,
