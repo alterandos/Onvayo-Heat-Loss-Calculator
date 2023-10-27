@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from data import din_12831_data
+from src.data import din_12831_data
 
 
 class BuildingElement:
@@ -148,8 +148,50 @@ class Building:
                 'theta__e': self.theta__e
             }) for element_data in data.get('building_elements', [])]
 
-        return
+        self.calculate_simplified_building_ventilation_loss()
+        self.calculate_simplified_building_design_transmission_heat_loss()
 
+        self.building_design_heat_load = self.calculate_design_heat_loss(self.building_design_transmission_heat_loss, self.ventilation_heat_loss)
+
+        return
+    
+    
+    def calculate_design_heat_loss(self, transmission_loss: float, ventilation_loss: float) -> float:
+        """
+        Calculate the building design heat load.
+        
+        Args:
+        - transmission_loss (W): Building design transmission heat loss.
+        - ventilation_loss (W): Building design ventilation heat loss.
+        
+        Returns:
+        - Building design heat load in Watts.
+        """
+        return transmission_loss + ventilation_loss
+
+    def calculate_simplified_building_design_transmission_heat_loss(self):
+        self.building_design_transmission_heat_loss = sum(element.design_transmission_loss for element in self.building_elements)
+
+    
+    def calculate_simplified_building_ventilation_loss(self):
+        self.ventilation_heat_loss = Building.calculate_simplified_building_ventilation_loss_static(
+            self.v__build, self.n__build, self.theta__int_build, self.theta__e)
+
+
+    @staticmethod
+    def calculate_simplified_building_ventilation_loss_static(v__build:float, n__build:float,theta__int_build,theta__e) -> float:
+        """
+        Calculate the building design ventilation heat loss.
+        
+        Args:
+        - b (Building): Input data for the building element.
+        
+        Returns:
+        - Building design ventilation heat loss in Watts.
+        """
+        rho_cp = 0.34  # Fixed matter constant of air in Wh/(m^3∙K)
+        return v__build * n__build * rho_cp * (theta__int_build - theta__e)
+    
 
     def get_simplified_additional_thermal_transmittance_for_thermal_bridges(self):
         self.delta__utb = self.delta__utb if self.delta__utb is not None else \
@@ -187,86 +229,3 @@ class Building:
     def get_simplified_internal_design_temperature_static(building_type:str):
         theta__int_build = din_12831_data.a_4_2_internal_design_temperature()
         return theta__int_build if theta__int_build is not None else din_12831_data.b_4_2_internal_design_temperature(building_type)
-
-
-    def calculate_simplified_building_ventilation_loss(self):
-        return Building.calculate_simplified_building_ventilation_loss_static(self)
-
-
-    @staticmethod
-    def calculate_simplified_building_ventilation_loss_static(b: 'Building') -> float:
-        """
-        Calculate the building design ventilation heat loss.
-        
-        Args:
-        - b (Building): Input data for the building element.
-        
-        Returns:
-        - Building design ventilation heat loss in Watts.
-        """
-        rho_cp = 0.34  # Fixed matter constant of air in Wh/(m^3∙K)
-        return b.v__build * b.n__build * rho_cp * (data.theta__int_build - data.theta__e)
-
-
-
-
-
-
-data = Building(
-    data = {
-        'build_year': 2000, # n_build=0.25, build_year_range = '>=1995'
-        'theta__e': -5,
-        'v__build': 500,
-        'theta__int_build': None,
-        'building_type': 'Residential', # theta__int_build=20
-        'delta__utb': None,
-        'delta__utb_selection_criteria': 'Buildings with mainly internal heat insulation broken by solid ceilings (e.g. reinforced concrete)', # delta_utb=0.15
-        'n__build': None,
-        'air_tightness_level': None,
-        'building_elements': [
-            {
-                'a__k': 100,
-                'u__k': 1.5,
-                'f__x': 0.5,
-                'be_adjacent_to': None,
-                'be_type': 'Doors',
-                'be_sub_type': None
-            },
-            {
-                'a__k': 130, 
-                'u__k': None,
-                'f__x': None,
-                'be_adjacent_to': 'ground', # f__x=0.3
-                'be_type': 'Doors',
-                'be_sub_type': 'all', # u__k=3.5
-            }
-        ]
-    }
-)
-
-print ('build year  || ', data.build_year)
-print ('delta__utb  || ', data.delta__utb)
-print ('n__build    || ', data.n__build)
-print ('theta__int  || ', data.theta__int_build)
-x=0
-for element in data.building_elements:
-    x+=1
-    print(f' ~b{x}~')
-    print(f'  u__k      || ', element.u__k)
-    print(f'  f__x      || ', element.f__x)
-    print(f'  f__x      || ', element.design_transmission_loss)
-
-
-
-def calculate_design_heat_loss(transmission_loss: float, ventilation_loss: float) -> float:
-    """
-    Calculate the building design heat load.
-    
-    Args:
-    - transmission_loss (W): Building design transmission heat loss.
-    - ventilation_loss (W): Building design ventilation heat loss.
-    
-    Returns:
-    - Building design heat load in Watts.
-    """
-    return transmission_loss + ventilation_loss
