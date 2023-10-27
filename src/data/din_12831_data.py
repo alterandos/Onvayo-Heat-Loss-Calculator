@@ -82,6 +82,7 @@ def b_4_3_simplified_u_value(be_type: str, be_sub_type: str, build_year: str):
     # U values in accordance with Annex B.4.3 [W/(m2∙K)]
     return b_4_3_table_b_15_u_values[be_type][be_sub_type][build_year_range]
 
+
 b_2_1_table_b_1_additional_thermal_transmittance_for_thermal_bridges = {
     "New buildings with a high level of heat insulation and attested minimization of thermal bridges that exceeds generally recognized rules of practice": 0.02,
     "New buildings in compliance with generally recognized rules of practice regarding the minimization of thermal bridges": 0.05,
