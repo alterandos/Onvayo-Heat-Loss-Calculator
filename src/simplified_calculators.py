@@ -116,6 +116,21 @@ class Building:
         if 'n__build' not in data and ('air_tightness_level' not in data and 'build_year' not in data):
             raise ValueError("If n__build is not provided, either air_tightness_level or build_year must be included.")
         
+        if self.theta__int_build is None and self.building_type is None:
+            raise ValueError('No value provided for theta__int_build or building type. If no value is provided for theta__int_build, a value must be provided for building type.')
+        
+        if self.building_elements is None or len(self.building_elements) < 1:
+            raise ValueError('No building elements provided.')
+        
+        if 'theta__int_build' not in data and 'building_type' not in data:
+            raise ValueError("If theta__int_build is not provided in the data, building_type must be included.")
+
+        if 'delta__utb' not in data and 'delta__utb_selection_criteria' not in data:
+            raise ValueError("If delta__utb is not provided in the data, delta__utb_selection_criteria must be included.")
+
+        if 'n__build' not in data and ('air_tightness_level' not in data and 'build_year' not in data):
+            raise ValueError("If n__build is not provided, either air_tightness_level or build_year must be included.")
+        
         # Blanket additional thermal transmittance for thermal bridges in W/(m^2∙K)
         self.get_simplified_additional_thermal_transmittance_for_thermal_bridges()
         # Air change rate in h-1, n__build
@@ -198,7 +213,7 @@ class Building:
 
 
 data = Building(
-        data = {
+    data = {
         'build_year': 2000, # n_build=0.25, build_year_range = '>=1995'
         'theta__e': -5,
         'v__build': 500,
@@ -233,10 +248,13 @@ print ('build year  || ', data.build_year)
 print ('delta__utb  || ', data.delta__utb)
 print ('n__build    || ', data.n__build)
 print ('theta__int  || ', data.theta__int_build)
+x=0
 for element in data.building_elements:
-    print('u__k        || ', element.u__k)
-    print('f__x        || ', element.f__x)
-    print('f__x        || ', element.design_transmission_loss)
+    x+=1
+    print(f' ~b{x}~')
+    print(f'  u__k      || ', element.u__k)
+    print(f'  f__x      || ', element.f__x)
+    print(f'  f__x      || ', element.design_transmission_loss)
 
 
 
